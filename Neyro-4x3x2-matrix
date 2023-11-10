@@ -1,0 +1,44 @@
+import numpy as np
+import math as ma
+import matplotlib.pyplot as plt
+
+
+x_input = np.array([[0.176, 0.34, 0.319, 0.974]])
+w_in_h = np.array([[0.086, 0.141, 0.793], [0.498, 0.956, 0.758], [0.267, 0.288, 0.507], [0.433, 0.946, 0.445]])
+w_out_h = np.array([[0.825, 0.522], [0.103, 0.172], [0.449, 0.309]])
+target = np.array([0.795, 0.737])
+alfa = float(input('Learning rate = '))
+M = int(input('Number of testing = '))
+
+e: float = list()
+n: int = list()
+j = 0
+for i in range(M):
+    xw = np.dot(x_input, w_in_h)
+    hi = np.array([])
+    for q in range(3):
+        hi = np.append(hi, 1/(1+ma.exp(-xw[0][q])))
+    hv = np.dot(hi, w_out_h)
+    out = np.array([])
+    for q in range(2):
+        out = np.append(out, 1/(1+ma.exp(-hv[q])))
+    e.append(ma.sqrt(((target - out) * (target - out))[1] + ((target - out) * (target - out))[1]))
+    j += 1
+    n.append(j)
+# Error back propagation starting now and hear!!!
+    delta_e = -(target - out) * (1 - out) * out
+    de_d_out = np.concatenate((hi * delta_e[0], hi * delta_e[1]), axis=None).reshape(2, 3).T
+    w_out_h -= alfa * de_d_out
+    delta_h = hi * (1 - hi) * np.sum(de_d_out, axis=1)
+    de_dh = np.concatenate((x_input * delta_h[0], x_input * delta_h[1], x_input * delta_h[2]), axis=None).reshape(3, 4).T
+    w_in_h -= alfa * de_dh
+
+fig, ax = plt.subplots()
+ax.plot(n, e)
+
+ax.set(xlabel='Количество циклов', ylabel='Ошибка',
+       title='Learning rate = ' + str(alfa))
+ax.grid()
+
+fig.savefig("test.png")
+plt.show()
